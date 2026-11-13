@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>trainAlice</title>
+<meta name="apple-mobile-web-app-title" content="trainAlice">
+<meta name="application-name" content="trainAlice">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f2f2ef">
+<style>
+:root{--bg:#f2f2ef;--card:#fff;--pill:#e9e9e5;--pill-on:#d0d0c9;--text:#1c1c1c;--muted:#a3a39a;--done:#1c1c1c;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.3}
+main{max-width:480px;margin:0 auto;padding:18px 14px 48px}
+h1{font-size:19px;text-align:center;margin:6px 0 18px;font-weight:700}
+.head{background:var(--card);border-radius:30px;padding:14px;margin-bottom:14px}
+.title{background:var(--pill);border-radius:999px;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.title b{font-size:20px}
+.title span{font-size:12px;font-weight:700;letter-spacing:.04em;color:#8b8b78;text-transform:uppercase}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--pill);border-radius:22px;padding:14px 4px 12px;text-align:center}
+.stat i{display:block;font-style:normal;font-size:22px;font-weight:700;line-height:1.1}
+.stat small{display:block;font-size:12px;margin-top:4px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.tabs button{border:none;background:var(--pill);color:var(--text);border-radius:999px;padding:14px 0;font-size:16px;font-weight:600;font-family:inherit}
+.tabs button.on{background:var(--pill-on)}
+.day{display:none}.day.on{display:block}
+.ex{background:var(--card);border-radius:26px;margin-bottom:10px;overflow:hidden}
+.top{display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer}
+.dot{flex:none;width:48px;height:48px;border-radius:50%;background:var(--pill);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#6f6f66}
+.dot svg{display:none;width:22px;height:22px}
+.ex.done .dot{background:var(--done);color:#fff}
+.ex.done .dot span{display:none}
+.ex.done .dot svg{display:block}
+.txt{flex:1;min-width:0}
+.name{font-size:17px;font-weight:600}
+.meta{font-size:14px;color:var(--muted);margin-top:3px;font-weight:500}
+.ex.done .name{color:var(--muted)}
+.prog{font-size:13px;font-weight:600;color:var(--muted);flex:none}
+.chev{flex:none;width:20px;height:20px;color:var(--muted);transition:transform .2s}
+.ex.open .chev{transform:rotate(180deg)}
+.sets{display:none;padding:0 12px 12px}
+.ex.open .sets{display:block}
+.set{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:18px;padding:10px 12px;margin-top:8px}
+.num{flex:none;width:22px;text-align:center;font-weight:700;font-size:15px;color:#6f6f66}
+.fld{flex:1;min-width:0;display:flex;align-items:center;gap:6px;background:var(--card);border-radius:14px;padding:0 12px}
+.fld input{flex:1;min-width:0;width:100%;border:none;outline:none;background:none;font-family:inherit;font-size:16px;font-weight:600;color:var(--text);padding:11px 0}
+.fld input::placeholder{color:#c4c4bb;font-weight:500}
+.fld small{flex:none;font-size:12px;color:var(--muted);font-weight:500}
+.box{flex:none;width:36px;height:36px;border-radius:50%;border:2px solid #c8c8c0;background:none;padding:0;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer}
+.box svg{display:none;width:18px;height:18px}
+.set.done .box{background:var(--done);border-color:var(--done)}
+.set.done .box svg{display:block}
+.set.done .fld input{color:var(--muted)}
+.set.done .num{color:var(--muted)}
+.note{font-size:12px;color:var(--muted);margin:10px 4px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>Тренировка</h1>
+<div class="head">
+  <div class="title"><b id="tname">Тренировка 1</b></div>
+  <div class="stats">
+    <div class="stat"><i id="s-time"></i><small>минут</small></div>
+    <div class="stat"><i id="s-ex"></i><small>упражнений</small></div>
+    <div class="stat"><i id="s-sets"></i><small>подходов</small></div>
+  </div>
+</div>
+<div class="tabs" id="tabs">
+  <button data-d="d1">День 1</button><button data-d="d2">День 2</button><button data-d="d3">День 3</button>
+</div>
+<section class="day" id="d1"></section>
+<section class="day" id="d2"></section>
+<section class="day" id="d3"></section>
+</main>
+<script>
+var DAYS={
+d1:{n:"Тренировка 1",f:"Ноги",t:"~70",ex:[["Жим ногами",4,"8–12"],["Румынская тяга с грифом",4,"8–10"],["Жим гантелей на наклонной скамье",3,"8–12"],["Вертикальная тяга широким хватом",3,"8–12"],["Сгибания ног лежа",4,"10–12"],["Махи гантелей в стороны",3,"12–15"]]},
+d2:{n:"Тренировка 2",f:"Верх тела",t:"~83",ex:[["Подтягивания в гравитроне",4,"8–10"],["Жим на дельты сидя в тренажере",3,"8–12"],["Тяга в тренажере с упором в грудь",4,"10–12"],["Протяжка с грифом на дельты",3,"10–12"],["Ягодичный мостик",4,"10–12"],["Обратные разведения (задняя дельта)",4,"12–15"],["Сет: разгибания рук на блоке + сгибания рук с гантелями",3,"10–12"]]},
+d3:{n:"Тренировка 3",f:"Ягодицы",t:"~76",ex:[["Болгарские сплит-приседы",3,"8–10","на ногу"],["Ягодичный мостик",4,"8–10"],["Гуд морнинг в гаке",3,"10–12"],["Разгибания ног сидя",3,"12–15"],["Пуловер в кроссовере",3,"12–15"],["Отжимания от возвышенности",3,"8–15"],["Махи в стороны в кроссовере",3,"12–15"]]}
+};
+function plural(n){return n===1?"подход":(n>=2&&n<=4?"подхода":"подходов")}
+var state={};
+try{state=JSON.parse(localStorage.getItem("protocol-checks-v3")||"{}")}catch(e){state={}}
+var vals={};
+try{vals=JSON.parse(localStorage.getItem("protocol-vals-v1")||"{}")}catch(e){vals={}}
+function saveV(){try{localStorage.setItem("protocol-vals-v1",JSON.stringify(vals))}catch(e){}}
+function save(){try{localStorage.setItem("protocol-checks-v3",JSON.stringify(state))}catch(e){}}
+var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+var CHEV='<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+Object.keys(DAYS).forEach(function(d){
+  var sec=document.getElementById(d);
+  DAYS[d].ex.forEach(function(x,i){
+    var row=document.createElement("div");
+    row.className="ex";
+    row.innerHTML='<div class="top"><div class="dot"><span></span>'+CHECK+'</div><div class="txt"><div class="name"></div><div class="meta"></div></div><span class="prog"></span>'+CHEV+'</div><div class="sets"></div>';
+    row.querySelector(".dot span").textContent=i+1;
+    row.querySelector(".name").textContent=x[0];
+    row.querySelector(".meta").textContent=x[1]+" "+plural(x[1])+" \u2022 "+x[2]+" повторений"+(x[3]?" "+x[3]:"");
+    var prog=row.querySelector(".prog"),box=row.querySelector(".sets");
+    function update(){
+      var n=0;
+      for(var j=0;j<x[1];j++){if(state[d+"-"+i+"-"+j])n++}
+      prog.textContent=n+"/"+x[1];
+      row.classList.toggle("done",n===x[1]);
+    }
+    for(var j=0;j<x[1];j++){(function(j){
+      var key=d+"-"+i+"-"+j;
+      var v=vals[key]||{};
+      var st=document.createElement("div");
+      st.className="set"+(state[key]?" done":"");
+      st.innerHTML='<span class="num"></span><label class="fld"><input type="text" inputmode="decimal" placeholder="0" aria-label="Вес, кг"><small>кг</small></label><label class="fld"><input type="text" inputmode="numeric" aria-label="Повторения"><small>повт.</small></label><button class="box" type="button" aria-label="Отметить подход">'+CHECK+'</button>';
+      st.querySelector(".num").textContent=j+1;
+      var ins=st.querySelectorAll("input");
+      ins[0].value=v.w||"";
+      ins[1].value=v.r||"";
+      ins[1].placeholder=x[2];
+      function saveVals(){vals[key]={w:ins[0].value,r:ins[1].value};saveV()}
+      ins[0].addEventListener("input",saveVals);
+      ins[1].addEventListener("input",saveVals);
+      st.querySelector(".box").addEventListener("click",function(){
+        state[key]=!state[key];st.classList.toggle("done",!!state[key]);save();update();
+      });
+      box.appendChild(st);
+    })(j)}
+    if(x[3]){var nt=document.createElement("div");nt.className="note";nt.textContent="Повторения указаны на каждую ногу";box.appendChild(nt)}
+    row.querySelector(".top").addEventListener("click",function(){row.classList.toggle("open")});
+    update();
+    sec.appendChild(row);
+  });
+});
+function show(d){
+  if(!DAYS[d])d="d1";
+  var D=DAYS[d],sets=0;
+  D.ex.forEach(function(x){sets+=x[1]});
+  document.getElementById("tname").textContent=D.n;
+  document.getElementById("s-time").textContent=D.t;
+  document.getElementById("s-ex").textContent=D.ex.length;
+  document.getElementById("s-sets").textContent=sets;
+  document.querySelectorAll(".day").forEach(function(s){s.classList.toggle("on",s.id===d)});
+  document.querySelectorAll("#tabs button").forEach(function(b){b.classList.toggle("on",b.dataset.d===d)});
+}
+document.querySelectorAll("#tabs button").forEach(function(b){
+  b.addEventListener("click",function(){show(b.dataset.d);try{location.hash=b.dataset.d}catch(e){}});
+});
+window.addEventListener("hashchange",function(){show(location.hash.replace("#",""))});
+show(location.hash.replace("#",""));
+</script>
+</body>
+</html>
